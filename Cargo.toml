@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 monadic = "0.5.5"
 num = "0.4.0"
+partial_application = "0.2.1"
