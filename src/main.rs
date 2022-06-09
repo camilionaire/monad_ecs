@@ -73,7 +73,50 @@ fn update_state() -> State<'static, St, ()> {
         pure ()
         };
     new_state
+}
+
+// fn is_it_time() -> bool {
+//     let st = stdo! {
+//         state <- get();
+//         pure (true)
+//     };
+//     let ans = st.
+// }
+
+// fn get_time(st: AppState) -> bool {
+
+// }
+
+fn key_loop() {
+    let device_state = DeviceState::new();
+    let mut prev_keys: Vec<u16> = Vec::new();
+    let mut st = init_state();
+
+    loop {
+        let keys = device_state.get_keys();
+
+        if prev_keys != keys && !keys.is_empty() {
+            if keys[0] == 32 {
+                println!("space bar pressed at time {:?}", Instant::now());
+            } else if keys[0] == 27 {
+                break;
+            }
+        }
+
+        if st.time.elapsed() > Duration::from_secs(1) {
+            let full_st = update_state().initial_state(st);
+            st = full_st.1;
+            println!("these are our results... I guess\n{:?}", st);
+        }
+
+        prev_keys = keys;
+
     }
+
+    // let res = loop_st.initial_state(st);
+
+
+}
 
 fn wrapper() {
     let new_state: State<'_, St, _> = stdo! {
@@ -109,7 +152,8 @@ fn wrapper() {
 // }
 
 fn main() {
-    wrapper();
+    // wrapper();
+    key_loop();
     // let start = Instant::now();
     // println!("Hello World!, this is the MAIN.RS!!!");
     // let duration = start.elapsed();
