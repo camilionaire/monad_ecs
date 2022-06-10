@@ -14,6 +14,7 @@
 3. To Run: `cargo run`
 
 ### Game Play :
+All the program does is start up the state and prints out the changing shape of of the state.  The sun element will switch from state Shining to Cool and vice versa, and the projectile will have it's x positional coordinates decrease.  When the space bar is pressed, it prints out a statment that the space bar has been pressed.
  * `cargo run` to start
  * `SPACEBAR` to initiate unfinished jump feature
  * `ESC` to end program

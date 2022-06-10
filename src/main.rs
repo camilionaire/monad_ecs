@@ -1,25 +1,31 @@
+// used to get keyboard inputs
 use keyboard_query::{DeviceQuery, DeviceState};
+// used to simulate monadic action blocks
 use monadic::{
     state::{get, put, State},
     state_trans::{get as stt_get, put as stt_put, StateT},
     stdo, stt_mdo,
 };
+// used to span time
 use std::{
     // thread,
     time::{Duration, Instant},
 };
 
+// sun object
 #[derive(Clone, Copy, Debug)]
 struct Sun {
     status: SunShine,
 }
 
+// projectile object
 #[derive(Clone, Debug)]
 struct Projectile {
     x: i32,
     _y: i32,
 }
 
+// app state
 #[derive(Clone, Debug)]
 struct AppState {
     time: Instant,
@@ -27,14 +33,17 @@ struct AppState {
     proj: Projectile,
 }
 
+// sunshine enum for sun
 #[derive(Clone, Copy, Debug)]
 enum SunShine {
     Shining,
     Cool,
 }
 
+// necessary definition for monadic crate, must be St
 type St = AppState;
 
+// just returns an app state with the initial values
 fn init_state() -> St {
     AppState {
         time: Instant::now(),
@@ -45,6 +54,8 @@ fn init_state() -> St {
     }
 }
 
+// something I was playing around with to try to make the 
+// stateful changes happen.
 fn _init_state2() -> State<'static, St, ()> {
     stdo! {
         _ <- put(AppState {
@@ -58,6 +69,7 @@ fn _init_state2() -> State<'static, St, ()> {
     }
 }
 
+// updates the initial state and returns monadic action block.
 fn update_state() -> State<'static, St, ()> {
     let new_time = Instant::now();
     let new_state: State<'_, St, _> = stdo! {
@@ -74,22 +86,24 @@ fn update_state() -> State<'static, St, ()> {
     new_state
 }
 
+// non functional main loop of program
 fn key_loop() {
     let device_state = DeviceState::new();
     let mut prev_keys: Vec<u16> = Vec::new();
     let mut st = init_state();
 
     loop {
+        // looks for the spacebar being pressed
+        // exits out of loop if escape key is pressed
         let keys = device_state.get_keys();
-
         if prev_keys != keys && !keys.is_empty() {
             match keys[0] {
-                32 => {
+                32 => { // the space bar key code
                     println!("space bar pressed at time {:?}", Instant::now());
                     prev_keys = keys;
                     continue;
                 }
-                27 => {
+                27 => { // the esc button key code
                     break;
                 }
                 _ => {
@@ -99,6 +113,7 @@ fn key_loop() {
             }
         }
 
+        // updating state happens every one second.
         if st.time.elapsed() > Duration::from_secs(1) {
             // trying out recursive update_state function
             // let full_st = update_state().initial_state(update_state().initial_state(st).1);
@@ -111,9 +126,13 @@ fn key_loop() {
     }
 }
 
+// my attempt at creating a monadic stateful solution for the program
+// was trying to put a loop inside of the action block, but that didn't 
+// work out.
 fn _loop_monad() -> StateT<'static, St, Vec<((), AppState)>, ()> {
     // let device_state = DeviceState::new();
     // let mut prev_keys: Vec<u16> = Vec::new();
+
     let loop_st = stt_mdo! {
 
         state <- stt_get();
@@ -123,6 +142,8 @@ fn _loop_monad() -> StateT<'static, St, Vec<((), AppState)>, ()> {
     loop_st
 }
 
+// original updating state function.  takes in a state, changes
+// the values and then returns that state.
 fn _og_upst(init_st: St) -> St {
     let new_time = Instant::now();
     let new_state: State<'_, St, _> = stdo! {
@@ -139,13 +160,7 @@ fn _og_upst(init_st: St) -> St {
     new_state.initial_state(init_st).1
 }
 
+// main call
 fn main() {
-    // let st = init_state2();
-    // println!("our results: \n{:?}", st);
-
-    // let res = update_state().initial_state(init_state());
-
-    // let res = loop_monad().initial_state(init_state());
-    // println!("our results: \n{:?}", res);
     key_loop();
 }
